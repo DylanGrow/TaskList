@@ -1,27 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="TaskFlow Pro: Secure and accessible task management tracker.">
-    <meta name="keywords" content="accounting, task tracker, taskflow, productivity, blue and silver">
-    <title>TaskFlow Pro</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="TaskFlow Pro – A professional task tracker built for accounting departments to manage, track, and sync work items efficiently." />
+  <meta name="keywords" content="task tracker, accounting, project management, TaskFlow Pro, productivity" />
+  <meta name="author" content="TaskFlow Pro" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="TaskFlow Pro – Accounting Task Tracker" />
+  <meta property="og:description" content="Manage accounting tasks with clarity and precision." />
+  <meta property="og:type" content="website" />
+
+  <title>TaskFlow Pro | Accounting Task Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
-    <main class="task-container">
-        <h2>TaskFlow Pro</h2>
-        
-        <div class="input-group">
-            <input type="text" id="task-input" placeholder="Enter a new work task..." aria-label="Enter a new work task">
-            <button id="add-btn" aria-label="Submit new task">Add Task</button>
+
+  <!-- Background grid texture -->
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <div id="app-wrapper">
+
+    <!-- ===== HEADER ===== -->
+    <header id="site-header" role="banner">
+      <div class="header-inner">
+        <div class="logo-block">
+          <span class="logo-icon" aria-hidden="true">◈</span>
+          <div>
+            <h1 class="logo-title">TaskFlow <span class="logo-accent">Pro</span></h1>
+            <p class="logo-sub">Accounting Department</p>
+          </div>
         </div>
-        
-        <div id="error-message" role="alert">Please enter a valid task before submitting.</div>
-        
-        <ul id="task-list" aria-live="polite"></ul>
+        <div class="header-meta" aria-live="polite" aria-label="Task statistics">
+          <div class="stat-pill" id="stat-total">
+            <span class="stat-num" id="count-total">0</span>
+            <span class="stat-label">Total</span>
+          </div>
+          <div class="stat-pill" id="stat-active">
+            <span class="stat-num" id="count-active">0</span>
+            <span class="stat-label">Active</span>
+          </div>
+          <div class="stat-pill" id="stat-done">
+            <span class="stat-num" id="count-done">0</span>
+            <span class="stat-label">Done</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== MAIN ===== -->
+    <main id="main-content" role="main">
+
+      <!-- Input Card -->
+      <section class="input-card" aria-labelledby="add-task-heading">
+        <h2 id="add-task-heading" class="section-heading">New Task</h2>
+
+        <div class="input-row">
+          <div class="input-wrapper">
+            <label for="task-input" class="sr-only">Enter a new task</label>
+            <input
+              type="text"
+              id="task-input"
+              class="task-input"
+              placeholder="e.g. Reconcile Q3 bank statements…"
+              aria-describedby="error-msg"
+              aria-required="true"
+              maxlength="200"
+              autocomplete="off"
+            />
+            <span class="input-underline" aria-hidden="true"></span>
+          </div>
+
+          <button
+            id="add-btn"
+            class="btn btn--primary"
+            aria-label="Add new task"
+          >
+            <span class="btn-icon" aria-hidden="true">+</span>
+            <span class="btn-text">Add Task</span>
+          </button>
+        </div>
+
+        <!-- Error message – hidden by default -->
+        <div
+          id="error-msg"
+          class="error-msg"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+          hidden
+        >
+          <span class="error-icon" aria-hidden="true">⚠</span>
+          Please enter a task description before adding.
+        </div>
+
+        <!-- API sync status -->
+        <div
+          id="sync-status"
+          class="sync-status"
+          role="status"
+          aria-live="polite"
+          aria-label="API sync status"
+          hidden
+        ></div>
+      </section>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar" role="group" aria-label="Filter tasks">
+        <button class="filter-btn active" data-filter="all" aria-pressed="true">All</button>
+        <button class="filter-btn" data-filter="active" aria-pressed="false">Active</button>
+        <button class="filter-btn" data-filter="completed" aria-pressed="false">Completed</button>
+        <button id="clear-completed-btn" class="filter-btn filter-btn--danger" aria-label="Clear all completed tasks">
+          Clear Completed
+        </button>
+      </div>
+
+      <!-- Task List -->
+      <section class="task-section" aria-labelledby="task-list-heading">
+        <h2 id="task-list-heading" class="sr-only">Task List</h2>
+
+        <ul
+          id="task-list"
+          class="task-list"
+          role="list"
+          aria-label="Task list"
+          aria-live="polite"
+        >
+          <!-- Tasks injected by JS -->
+        </ul>
+
+        <!-- Empty state -->
+        <div id="empty-state" class="empty-state" aria-hidden="false">
+          <span class="empty-icon" aria-hidden="true">◫</span>
+          <p class="empty-title">No tasks yet</p>
+          <p class="empty-sub">Add your first task above to get started.</p>
+        </div>
+      </section>
+
     </main>
 
-    <script src="script.js"></script>
+    <!-- ===== FOOTER ===== -->
+    <footer id="site-footer" role="contentinfo">
+      <p>TaskFlow Pro &copy; <span id="footer-year"></span> &mdash; Accounting Division</p>
+    </footer>
+
+  </div><!-- /#app-wrapper -->
+
+  <script src="script.js"></script>
 </body>
 </html>

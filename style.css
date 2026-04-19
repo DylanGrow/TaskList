@@ -1,153 +1,858 @@
+/* ============================================================
+   TaskFlow Pro – style.css
+   Color Palette: Deep Corporate Blue + Metallic Silver
+   Selectors demonstrated:
+     • ID selectors       (#site-header, #add-btn, #task-list, …)
+     • Class selectors    (.btn, .task-item, .filter-btn, …)
+     • Chained selectors  (.task-item.completed .task-text, …)
+     • Pseudo-elements    (::before, ::after, custom scrollbar)
+   ============================================================ */
+
+/* ── CSS Variables ── */
 :root {
-    --brand-primary: #003865;
-    --brand-secondary: #005A9C;
-    --brand-silver: #8A9AAB;
-    --brand-light-silver: #D2D8E0;
-    --brand-background: #F0F4F8;
-    --brand-text: #1C2A39;
-    --error-color: #D32F2F;
+  /* Blues */
+  --navy-950:   #050c1a;
+  --navy-900:   #0a1628;
+  --navy-800:   #0f2044;
+  --navy-700:   #163060;
+  --navy-600:   #1e4080;
+  --navy-500:   #2554a0;
+  --navy-400:   #3a6bbf;
+  --navy-300:   #5a8fd4;
+
+  /* Silvers */
+  --silver-100: #f4f6f9;
+  --silver-200: #e0e5ee;
+  --silver-300: #c8d0de;
+  --silver-400: #9aaabf;
+  --silver-500: #6d80a0;
+
+  /* Accents */
+  --gold:       #c9a84c;
+  --gold-light: #e2c47a;
+  --danger:     #c0392b;
+  --danger-bg:  #2d1010;
+  --success:    #27ae60;
+  --success-bg: #0e2416;
+
+  /* Typography */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'DM Sans', 'Segoe UI', sans-serif;
+
+  /* Spacing */
+  --radius-sm:  6px;
+  --radius-md:  12px;
+  --radius-lg:  20px;
+  --shadow-card: 0 4px 32px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.3);
+  --shadow-btn:  0 2px 16px rgba(37, 84, 160, 0.45);
+
+  /* Transitions */
+  --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ── Reset & Base ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--brand-background);
-    color: var(--brand-text);
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-    margin: 0;
-    -webkit-font-smoothing: antialiased;
+  font-family: var(--font-body);
+  background-color: var(--navy-950);
+  color: var(--silver-200);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
 }
 
-.task-container {
-    background: #FFFFFF;
-    padding: 30px;
-    border-radius: 8px;
-    border-top: 5px solid var(--brand-primary);
-    border-bottom: 5px solid var(--brand-light-silver);
-    box-shadow: 0 8px 16px rgba(0, 56, 101, 0.1);
-    width: 100%;
-    max-width: 500px;
+/* Screen-reader only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
 }
 
-h2 {
-    color: var(--brand-primary);
-    margin-top: 0;
-    font-weight: 700;
-    letter-spacing: -0.5px;
+/* ── Background Grid (ID + pseudo-element) ── */
+#app-wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
 }
 
-.input-group {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
+/* Blueprint-style grid texture via pseudo-element */
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(37, 84, 160, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 84, 160, 0.07) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
-input[type="text"] {
-    flex-grow: 1;
-    padding: 12px;
-    border: 2px solid var(--brand-light-silver);
-    border-radius: 4px;
-    font-size: 16px;
-    color: var(--brand-text);
-    transition: border-color 0.3s;
+/* Radial glow behind the card */
+.bg-grid::before {
+  content: '';
+  position: fixed;
+  top: -10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 500px;
+  background: radial-gradient(ellipse at center, rgba(37, 84, 160, 0.18) 0%, transparent 70%);
+  pointer-events: none;
 }
 
-input[type="text"]:focus {
-    outline: none;
-    border-color: var(--brand-secondary);
+/* ── HEADER ── */
+#site-header {
+  padding: 40px 0 32px;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.25);
+  margin-bottom: 32px;
 }
 
-input[type="text"]::placeholder {
-    color: var(--brand-silver);
-    font-style: italic;
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
-button {
-    background-color: var(--brand-primary);
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 600;
-    transition: background-color 0.2s, transform 0.1s;
+.logo-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-button:hover {
-    background-color: var(--brand-secondary);
+/* ID + pseudo-element: decorative rule under logo icon */
+.logo-icon {
+  font-size: 2.2rem;
+  color: var(--gold);
+  line-height: 1;
+  position: relative;
+  display: flex;
 }
 
-button:active {
-    transform: scale(0.98);
+.logo-icon::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
 }
 
-#error-message {
-    color: var(--error-color);
-    font-size: 14px;
-    display: none;
-    margin-bottom: 15px;
-    font-weight: 500;
+.logo-title {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--silver-100);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
 }
 
+.logo-accent {
+  color: var(--gold);
+}
+
+.logo-sub {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--silver-400);
+  margin-top: 2px;
+}
+
+/* Stats pills */
+.header-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stat-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-md);
+  padding: 10px 18px;
+  min-width: 68px;
+  backdrop-filter: blur(4px);
+  transition: border-color 0.2s var(--ease);
+}
+
+/* Chained selector: hover state on specific stat pill IDs */
+#stat-active:hover { border-color: rgba(37, 84, 160, 0.5); }
+#stat-done:hover   { border-color: rgba(39, 174, 96, 0.4); }
+
+.stat-num {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--silver-100);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--silver-500);
+  margin-top: 3px;
+}
+
+/* ── INPUT CARD ── */
+.input-card {
+  background: linear-gradient(135deg, rgba(15, 32, 68, 0.9) 0%, rgba(10, 22, 40, 0.95) 100%);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 28px 28px 24px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative corner accent via pseudo-element */
+.input-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle at top right, rgba(201, 168, 76, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Gold top-border accent */
+.input-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 28px;
+  right: 28px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  border-radius: 0 0 2px 2px;
+}
+
+.section-heading {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 18px;
+}
+
+/* Input row: Flexbox layout */
+.input-row {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+/* ID selector: the main task input */
+#task-input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-sm);
+  color: var(--silver-100);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  padding: 14px 16px;
+  outline: none;
+  transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease), background 0.25s;
+  height: 52px;
+}
+
+#task-input::placeholder {
+  color: var(--silver-500);
+  font-style: italic;
+}
+
+#task-input:focus {
+  border-color: var(--navy-400);
+  background: rgba(37, 84, 160, 0.08);
+  box-shadow: 0 0 0 3px rgba(37, 84, 160, 0.2), 0 0 20px rgba(37, 84, 160, 0.1);
+}
+
+/* Animated underline on focus */
+.input-underline {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: var(--gold);
+  border-radius: 2px;
+  transition: width 0.3s var(--ease);
+  pointer-events: none;
+}
+
+#task-input:focus ~ .input-underline {
+  width: calc(100% - 2px);
+}
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease), background 0.2s;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ripple pseudo-element on button */
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background 0.3s;
+}
+
+.btn:active::after {
+  background: rgba(255,255,255,0.08);
+}
+
+/* ID selector for the main add button */
+#add-btn {
+  background: linear-gradient(135deg, var(--navy-500) 0%, var(--navy-700) 100%);
+  color: var(--silver-100);
+  padding: 0 22px;
+  height: 52px;
+  box-shadow: var(--shadow-btn);
+  border: 1px solid rgba(90, 143, 212, 0.3);
+}
+
+#add-btn:hover {
+  background: linear-gradient(135deg, var(--navy-400) 0%, var(--navy-600) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 24px rgba(37, 84, 160, 0.6);
+}
+
+#add-btn:active {
+  transform: translateY(0);
+}
+
+.btn-icon {
+  font-size: 1.3rem;
+  font-weight: 300;
+  line-height: 1;
+}
+
+/* ── ERROR MESSAGE ── */
+.error-msg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--danger-bg);
+  border: 1px solid rgba(192, 57, 43, 0.4);
+  border-radius: var(--radius-sm);
+  color: #e07070;
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: slideDown 0.25s var(--ease);
+}
+
+/* Pseudo-element: decorative left accent on error */
+.error-msg::before {
+  content: '';
+  position: absolute;
+  left: 28px;
+  width: 3px;
+  height: 38px;
+  background: var(--danger);
+  border-radius: 2px;
+}
+
+.error-icon {
+  font-size: 1rem;
+  color: var(--danger);
+}
+
+[hidden] { display: none !important; }
+
+/* ── SYNC STATUS ── */
+.sync-status {
+  margin-top: 10px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  animation: fadeIn 0.3s var(--ease);
+}
+
+.sync-status.syncing {
+  background: rgba(37, 84, 160, 0.15);
+  border: 1px solid rgba(37, 84, 160, 0.3);
+  color: var(--navy-300);
+}
+
+.sync-status.success {
+  background: var(--success-bg);
+  border: 1px solid rgba(39, 174, 96, 0.3);
+  color: #6fcf97;
+}
+
+.sync-status.error {
+  background: var(--danger-bg);
+  border: 1px solid rgba(192, 57, 43, 0.3);
+  color: #e07070;
+}
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 50px;
+  color: var(--silver-400);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 6px 16px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: all 0.2s var(--ease);
+}
+
+.filter-btn:hover {
+  border-color: rgba(255,255,255,0.2);
+  color: var(--silver-200);
+}
+
+/* Chained selector: active filter button state */
+.filter-btn.active {
+  background: var(--navy-700);
+  border-color: var(--navy-400);
+  color: var(--silver-100);
+  box-shadow: 0 2px 8px rgba(37, 84, 160, 0.3);
+}
+
+/* Chained selector: danger variant for clear button */
+.filter-btn.filter-btn--danger {
+  margin-left: auto;
+  border-color: rgba(192, 57, 43, 0.3);
+  color: #c07070;
+}
+
+.filter-btn.filter-btn--danger:hover {
+  background: rgba(192, 57, 43, 0.15);
+  border-color: rgba(192, 57, 43, 0.5);
+  color: #e07070;
+}
+
+/* ── TASK SECTION & LIST ── */
+.task-section {
+  position: relative;
+}
+
+/* ID selector: the scrollable task list */
 #task-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    max-height: 400px;
-    overflow-y: auto;
+  list-style: none;
+  max-height: 460px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
 }
 
+/* ═══════════════════════════════════════
+   CUSTOM SCROLLBAR (Pseudo-elements)
+   ═══════════════════════════════════════ */
 #task-list::-webkit-scrollbar {
-    width: 8px;
+  width: 6px;
+}
+
+#task-list::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
 }
 
 #task-list::-webkit-scrollbar-thumb {
-    background: var(--brand-silver);
-    border-radius: 4px;
+  background: linear-gradient(180deg, var(--navy-500), var(--navy-700));
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.05);
 }
 
-li {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    background: #FFFFFF;
-    border: 1px solid var(--brand-light-silver);
-    border-radius: 4px;
-    margin-bottom: 8px;
-    transition: all 0.2s;
+#task-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--gold), var(--navy-500));
 }
 
-li:hover {
-    border-color: var(--brand-silver);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+/* Firefox scrollbar */
+#task-list {
+  scrollbar-width: thin;
+  scrollbar-color: var(--navy-500) rgba(255,255,255,0.03);
 }
 
-li input[type="checkbox"] {
-    margin-right: 15px;
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-    accent-color: var(--brand-secondary);
+/* ── TASK ITEMS ── */
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: linear-gradient(135deg, rgba(15, 32, 68, 0.7) 0%, rgba(10, 22, 40, 0.8) 100%);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s, opacity 0.3s;
+  animation: taskSlideIn 0.3s var(--ease);
+  position: relative;
 }
 
-li.completed {
-    background-color: var(--brand-background);
-    border-color: transparent;
-    opacity: 0.7;
+/* Pseudo-element: left accent bar on each task */
+.task-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 3px;
+  background: var(--navy-400);
+  border-radius: 0 3px 3px 0;
+  transition: background 0.3s, height 0.3s;
 }
 
-li.completed span {
-    text-decoration: line-through;
-    color: var(--brand-silver);
+.task-item:hover {
+  transform: translateX(3px);
+  border-color: rgba(37, 84, 160, 0.3);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
-@media (max-width: 480px) {
-    .input-group {
-        flex-direction: column;
-    }
-    button {
-        width: 100%;
-    }
+/* Chained selector: completed task item */
+.task-item.completed {
+  opacity: 0.6;
+  border-color: rgba(255,255,255,0.04);
+}
+
+/* Chained selector: left accent on completed tasks */
+.task-item.completed::before {
+  background: var(--success);
+}
+
+/* ── CUSTOM CHECKBOX ── */
+.task-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.task-checkbox-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  margin-top: 2px;
+  position: relative;
+}
+
+/* Checkmark pseudo-element */
+.task-checkbox-label::after {
+  content: '';
+  width: 6px;
+  height: 10px;
+  border-right: 2px solid var(--silver-100);
+  border-bottom: 2px solid var(--silver-100);
+  transform: rotate(45deg) scale(0) translateY(-1px);
+  transition: transform 0.2s var(--ease);
+}
+
+/* Chained selector: checked state label */
+.task-checkbox:checked + .task-checkbox-label {
+  background: var(--success);
+  border-color: var(--success);
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.4);
+}
+
+.task-checkbox:checked + .task-checkbox-label::after {
+  transform: rotate(45deg) scale(1) translateY(-1px);
+}
+
+.task-checkbox-label:hover {
+  border-color: var(--navy-300);
+}
+
+/* Focus ring for keyboard accessibility */
+.task-checkbox:focus-visible + .task-checkbox-label {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* ── TASK CONTENT ── */
+.task-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-text {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--silver-100);
+  word-break: break-word;
+  transition: color 0.3s, text-decoration-color 0.3s;
+  text-decoration: none;
+  line-height: 1.5;
+}
+
+/* Chained selector: strikethrough on completed task text */
+.task-item.completed .task-text {
+  text-decoration: line-through;
+  text-decoration-color: var(--silver-500);
+  color: var(--silver-500);
+}
+
+.task-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.task-timestamp {
+  font-size: 0.72rem;
+  color: var(--silver-500);
+  letter-spacing: 0.04em;
+}
+
+/* Chained selector: completed timestamp style */
+.task-item.completed .task-timestamp {
+  color: var(--silver-500);
+}
+
+/* ── DELETE BUTTON ── */
+.btn-delete {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--silver-500);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 5px 10px;
+  transition: all 0.2s var(--ease);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 1px;
+  text-transform: uppercase;
+}
+
+.btn-delete:hover {
+  background: rgba(192, 57, 43, 0.15);
+  border-color: rgba(192, 57, 43, 0.4);
+  color: #e07070;
+}
+
+.btn-delete:focus-visible {
+  outline: 2px solid var(--danger);
+  outline-offset: 2px;
+}
+
+/* Pseudo-element: × icon on delete via ::before */
+.btn-delete::before {
+  content: '× ';
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  opacity: 0.6;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 16px;
+  color: var(--silver-400);
+  line-height: 1;
+}
+
+.empty-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--silver-300);
+  margin-bottom: 6px;
+}
+
+.empty-sub {
+  font-size: 0.85rem;
+  color: var(--silver-500);
+}
+
+/* ── FOOTER ── */
+#site-footer {
+  margin-top: 48px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--silver-500);
+  letter-spacing: 0.06em;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes taskSlideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── FOCUS STYLES ── */
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* ── RESPONSIVE – MOBILE ── */
+@media (max-width: 600px) {
+  #app-wrapper {
+    padding: 0 14px 40px;
+  }
+
+  #site-header {
+    padding: 28px 0 24px;
+    margin-bottom: 24px;
+  }
+
+  .header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .header-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .stat-pill {
+    flex: 1;
+    min-width: unset;
+    padding: 8px 10px;
+  }
+
+  .logo-title {
+    font-size: 1.45rem;
+  }
+
+  .input-card {
+    padding: 20px 18px 18px;
+  }
+
+  .input-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #task-input {
+    width: 100%;
+  }
+
+  #add-btn {
+    width: 100%;
+    justify-content: center;
+    height: 48px;
+  }
+
+  .task-item {
+    padding: 14px 14px;
+    gap: 10px;
+  }
+
+  .filter-bar {
+    gap: 6px;
+  }
+
+  #clear-completed-btn {
+    margin-left: 0;
+    flex-basis: 100%;
+    text-align: center;
+  }
+
+  #task-list {
+    max-height: 380px;
+  }
+}
+
+@media (max-width: 380px) {
+  .logo-title { font-size: 1.25rem; }
+  .stat-num   { font-size: 1.2rem; }
 }
