@@ -1,17 +1,18 @@
 /**
- * TaskFlow Pro – script.js
- * Vanilla JavaScript task tracker for the Accounting Department.
+ * DRAFT. — script.js
+ * Universal Task Tracker
  *
  * Features:
- *  - Add tasks via button click or Enter key
- *  - Empty-submission error message
- *  - Checkbox toggle → "completed" strikethrough state
- *  - Delete button removes task from DOM
- *  - Filter tasks (All / Active / Completed)
+ *  - Typewriter animation for rotating taglines
+ *  - Add tasks via button or Enter key
+ *  - Empty submission error display
+ *  - Checkbox toggle → completed strikethrough state
+ *  - Delete button with fade-out animation
+ *  - Filter (All / Active / Completed)
  *  - Clear Completed batch action
- *  - Live task-count stats in the header
- *  - Persist tasks to localStorage
- *  - syncWithAPI() – async placeholder for backend integration
+ *  - Live stat counters
+ *  - localStorage persistence
+ *  - syncWithAPI() async placeholder for backend integration
  */
 
 'use strict';
@@ -31,13 +32,70 @@ const countTotal        = document.getElementById('count-total');
 const countActive       = document.getElementById('count-active');
 const countDone         = document.getElementById('count-done');
 const footerYear        = document.getElementById('footer-year');
+const typewriterLine    = document.getElementById('typewriter-line');
 
 /* ═══════════════════════════════════════════════
    STATE
    ═══════════════════════════════════════════════ */
-let tasks         = [];           // Array of task objects
-let activeFilter  = 'all';        // 'all' | 'active' | 'completed'
-let taskIdCounter = 0;            // Simple incrementing ID
+let tasks         = [];
+let activeFilter  = 'all';
+let taskIdCounter = 0;
+
+/* ═══════════════════════════════════════════════
+   TYPEWRITER TAGLINE
+   ═══════════════════════════════════════════════ */
+const TAGLINES = [
+  'The blank page is your oldest ally.',
+  'Every great plan began as a scribble.',
+  'Write it down. Make it real.',
+  'One task at a time. That\'s all it takes.',
+  'Clarity lives in lists.',
+  'Ink is the antidote to forgetting.',
+  'The shortest pencil beats the longest memory.',
+  'What gets written gets done.',
+  'Draft first. Perfect later.',
+  'Your to-do list is your autobiography in progress.',
+];
+
+let twIndex     = 0;
+let twCharIndex = 0;
+let twDeleting  = false;
+let twTimeout   = null;
+
+function typewriterTick() {
+  const current = TAGLINES[twIndex];
+
+  if (!twDeleting) {
+    // Typing forward
+    twCharIndex++;
+    typewriterLine.textContent = current.slice(0, twCharIndex);
+
+    if (twCharIndex === current.length) {
+      // Pause at end before deleting
+      twTimeout = setTimeout(() => {
+        twDeleting = true;
+        typewriterTick();
+      }, 2800);
+      return;
+    }
+    // Randomise typing speed for realism
+    const speed = 42 + Math.random() * 38;
+    twTimeout = setTimeout(typewriterTick, speed);
+  } else {
+    // Deleting
+    twCharIndex--;
+    typewriterLine.textContent = current.slice(0, twCharIndex);
+
+    if (twCharIndex === 0) {
+      twDeleting = false;
+      twIndex    = (twIndex + 1) % TAGLINES.length;
+      twTimeout  = setTimeout(typewriterTick, 500);
+      return;
+    }
+    const speed = 18 + Math.random() * 20;
+    twTimeout = setTimeout(typewriterTick, speed);
+  }
+}
 
 /* ═══════════════════════════════════════════════
    INIT
@@ -47,26 +105,24 @@ function init() {
   loadFromStorage();
   renderAll();
   attachEventListeners();
+  // Start typewriter after short delay
+  setTimeout(typewriterTick, 800);
 }
 
 /* ═══════════════════════════════════════════════
    EVENT LISTENERS
    ═══════════════════════════════════════════════ */
 function attachEventListeners() {
-  // Add task on button click
   addBtn.addEventListener('click', handleAddTask);
 
-  // Add task on Enter key
   taskInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') handleAddTask();
   });
 
-  // Hide error when user starts typing
   taskInput.addEventListener('input', () => {
     if (taskInput.value.trim() !== '') hideError();
   });
 
-  // Filter buttons
   filterBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
       activeFilter = btn.dataset.filter;
@@ -75,7 +131,6 @@ function attachEventListeners() {
     });
   });
 
-  // Clear completed
   clearCompletedBtn.addEventListener('click', handleClearCompleted);
 }
 
@@ -94,25 +149,24 @@ function handleAddTask() {
   hideError();
 
   const newTask = {
-    id:          ++taskIdCounter,
-    text:        sanitize(rawText),
-    completed:   false,
-    createdAt:   new Date().toISOString(),
+    id:        ++taskIdCounter,
+    text:      sanitize(rawText),
+    completed: false,
+    createdAt: new Date().toISOString(),
   };
 
-  tasks.unshift(newTask);   // newest first
+  tasks.unshift(newTask);
   saveToStorage();
   renderAll();
 
   taskInput.value = '';
   taskInput.focus();
 
-  // Fire async API sync (non-blocking)
   syncWithAPI(newTask);
 }
 
 /* ═══════════════════════════════════════════════
-   RENDER FUNCTIONS
+   RENDER
    ═══════════════════════════════════════════════ */
 function renderAll() {
   renderTaskList();
@@ -120,75 +174,67 @@ function renderAll() {
 }
 
 function renderTaskList() {
-  // Filter tasks based on current filter
   const filtered = tasks.filter((task) => {
     if (activeFilter === 'active')    return !task.completed;
     if (activeFilter === 'completed') return task.completed;
     return true;
   });
 
-  // Clear existing list items
   taskList.innerHTML = '';
 
   if (filtered.length === 0) {
-    emptyState.removeAttribute('aria-hidden');
     emptyState.style.display = 'block';
+    emptyState.removeAttribute('aria-hidden');
   } else {
-    emptyState.setAttribute('aria-hidden', 'true');
     emptyState.style.display = 'none';
-
-    filtered.forEach((task) => {
-      taskList.appendChild(createTaskElement(task));
+    emptyState.setAttribute('aria-hidden', 'true');
+    filtered.forEach((task, index) => {
+      taskList.appendChild(createTaskElement(task, filtered.length - index));
     });
   }
 }
 
 /**
- * Creates and returns a <li> element for a given task object.
+ * Builds the <li> for a task, including blockquote style, checkbox, and delete.
  * @param {Object} task
- * @returns {HTMLElement}
+ * @param {number} entryNum  — displayed as a stamp in the corner
+ * @returns {HTMLLIElement}
  */
-function createTaskElement(task) {
+function createTaskElement(task, entryNum) {
   const li = document.createElement('li');
   li.classList.add('task-item');
-  li.dataset.id = task.id;
   if (task.completed) li.classList.add('completed');
+  li.dataset.id  = task.id;
+  li.dataset.num = `#${String(entryNum).padStart(3, '0')}`;
   li.setAttribute('role', 'listitem');
 
-  const checkboxId = `checkbox-${task.id}`;
-  const formattedDate = formatDate(task.createdAt);
+  const checkId = `chk-${task.id}`;
+  const dateStr  = formatDate(task.createdAt);
 
   li.innerHTML = `
     <input
       type="checkbox"
-      id="${checkboxId}"
+      id="${checkId}"
       class="task-checkbox"
-      aria-label="Mark task as ${task.completed ? 'incomplete' : 'complete'}: ${task.text}"
+      aria-label="Mark as ${task.completed ? 'incomplete' : 'complete'}: ${task.text}"
       ${task.completed ? 'checked' : ''}
     />
-    <label for="${checkboxId}" class="task-checkbox-label" aria-hidden="true"></label>
+    <label for="${checkId}" class="task-checkbox-label" aria-hidden="true"></label>
 
     <div class="task-content">
       <span class="task-text">${task.text}</span>
-      <div class="task-meta">
-        <span class="task-timestamp" aria-label="Added ${formattedDate}">${formattedDate}</span>
-      </div>
+      <span class="task-timestamp" aria-label="Filed ${dateStr}">Filed: ${dateStr}</span>
     </div>
 
     <button
       class="btn-delete"
-      aria-label="Delete task: ${task.text}"
-      title="Remove this task"
-    >Remove</button>
+      aria-label="Delete entry: ${task.text}"
+      title="Discard this entry"
+    >Discard</button>
   `;
 
-  // Checkbox: toggle completed state
-  const checkbox = li.querySelector('.task-checkbox');
-  checkbox.addEventListener('change', () => toggleTask(task.id));
-
-  // Delete button: remove task
-  const deleteBtn = li.querySelector('.btn-delete');
-  deleteBtn.addEventListener('click', () => deleteTask(task.id));
+  li.querySelector('.task-checkbox').addEventListener('change', () => toggleTask(task.id));
+  li.querySelector('.btn-delete').addEventListener('click', () => deleteTask(task.id));
 
   return li;
 }
@@ -205,25 +251,31 @@ function toggleTask(id) {
 }
 
 function deleteTask(id) {
-  // Animate removal
   const li = taskList.querySelector(`[data-id="${id}"]`);
   if (li) {
-    li.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+    li.style.transition = 'opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease';
     li.style.opacity    = '0';
     li.style.transform  = 'translateX(20px)';
+    li.style.maxHeight  = li.offsetHeight + 'px';
+    // Collapse height after fade
+    setTimeout(() => {
+      li.style.maxHeight  = '0';
+      li.style.marginBottom = '0';
+      li.style.padding    = '0';
+      li.style.overflow   = 'hidden';
+    }, 200);
     setTimeout(() => {
       tasks = tasks.filter((t) => t.id !== id);
       saveToStorage();
       renderAll();
-    }, 250);
+    }, 420);
   }
 }
 
 function handleClearCompleted() {
-  const completedCount = tasks.filter((t) => t.completed).length;
-  if (completedCount === 0) return;
-
-  if (confirm(`Remove ${completedCount} completed task${completedCount > 1 ? 's' : ''}?`)) {
+  const n = tasks.filter((t) => t.completed).length;
+  if (n === 0) return;
+  if (confirm(`Discard ${n} completed entr${n > 1 ? 'ies' : 'y'}?`)) {
     tasks = tasks.filter((t) => !t.completed);
     saveToStorage();
     renderAll();
@@ -234,10 +286,9 @@ function handleClearCompleted() {
    STATS
    ═══════════════════════════════════════════════ */
 function updateStats() {
-  const total     = tasks.length;
-  const done      = tasks.filter((t) => t.completed).length;
-  const active    = total - done;
-
+  const total  = tasks.length;
+  const done   = tasks.filter((t) => t.completed).length;
+  const active = total - done;
   countTotal.textContent  = total;
   countActive.textContent = active;
   countDone.textContent   = done;
@@ -261,14 +312,13 @@ function updateFilterUI(activeBtn) {
 function showError() {
   errorMsg.removeAttribute('hidden');
   taskInput.setAttribute('aria-invalid', 'true');
-  // Shake animation
   taskInput.animate([
     { transform: 'translateX(0)' },
-    { transform: 'translateX(-6px)' },
-    { transform: 'translateX(6px)' },
-    { transform: 'translateX(-4px)' },
+    { transform: 'translateX(-5px)' },
+    { transform: 'translateX(5px)' },
+    { transform: 'translateX(-3px)' },
     { transform: 'translateX(0)' },
-  ], { duration: 350, easing: 'ease-in-out' });
+  ], { duration: 300, easing: 'ease-in-out' });
 }
 
 function hideError() {
@@ -280,71 +330,54 @@ function hideError() {
    API INTEGRATION (Async Placeholder)
    ═══════════════════════════════════════════════ */
 /**
- * syncWithAPI – Demonstrates how to securely POST a new task to a
- * backend REST API endpoint. Replace the URL and auth header with real
- * values in a production environment.
+ * syncWithAPI — Demonstrates secure task submission to a backend API.
  *
  * Security notes:
- *  • The API key / JWT token should be stored server-side or injected
- *    via an environment variable at build time — NEVER hardcoded here.
- *  • In production, use HTTPS exclusively and validate the payload
- *    server-side to prevent injection attacks.
- *  • The Content-Type header ensures the server treats the body as JSON.
+ *  • Never store auth tokens in JS variables. Use HTTP-only cookies
+ *    or inject via a secure server-side session.
+ *  • Always use HTTPS in production.
+ *  • Validate and sanitize input on the server, independent of client-side sanitization.
  *
  * @param {Object} task - The task object to sync
  * @returns {Promise<void>}
  */
 async function syncWithAPI(task) {
-  showSyncStatus('syncing', '⟳  Syncing with server…');
+  showSyncStatus('syncing', '⌛  Committing to ledger…');
 
   try {
-    // ── Simulated network delay (remove in production) ──
-    await simulatedDelay(1200);
+    await simulatedDelay(1400);
 
-    /* ── PRODUCTION TEMPLATE (uncomment and configure) ──────────────────
+    /* ── PRODUCTION TEMPLATE ─────────────────────────────────────────────
     const response = await fetch('https://api.yourdomain.com/v1/tasks', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Token retrieved from a secure session cookie or auth provider:
         'Authorization': `Bearer ${getSessionToken()}`,
       },
       body: JSON.stringify({
         text:      task.text,
         completed: task.completed,
         createdAt: task.createdAt,
-        department: 'accounting',
       }),
     });
 
-    if (!response.ok) {
-      throw new Error(`Server responded with ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    console.info('[TaskFlow Pro] Task synced:', data);
-    ──────────────────────────────────────────────────────────────────── */
+    console.info('[DRAFT.] Task synced:', data);
+    ─────────────────────────────────────────────────────────────────────── */
 
-    // Simulate a successful response for the demo
-    const mockResponse = {
-      success: true,
-      serverId: `SRV-${Math.floor(Math.random() * 90000) + 10000}`,
-      message: 'Task saved to accounting database.',
-    };
-
-    console.info('[TaskFlow Pro] syncWithAPI → Mock response:', mockResponse);
-    showSyncStatus('success', `✓  Synced — Server ID: ${mockResponse.serverId}`);
+    const mockId = `DFT-${Math.random().toString(36).slice(2,8).toUpperCase()}`;
+    console.info('[DRAFT.] syncWithAPI → Mock commit:', { id: mockId, task });
+    showSyncStatus('success', `✓  Entry committed — Ref: ${mockId}`);
 
   } catch (err) {
-    console.error('[TaskFlow Pro] syncWithAPI → Error:', err);
-    showSyncStatus('error', `✕  Sync failed: ${err.message || 'Network error'}`);
+    console.error('[DRAFT.] syncWithAPI error:', err);
+    showSyncStatus('error', `✕  Commit failed: ${err.message || 'Connection error'}`);
   } finally {
-    // Auto-dismiss sync status after 4 seconds
     setTimeout(hideSyncStatus, 4000);
   }
 }
 
-/* ── Sync status helpers ── */
 function showSyncStatus(type, message) {
   syncStatus.removeAttribute('hidden');
   syncStatus.className = `sync-status ${type}`;
@@ -353,30 +386,26 @@ function showSyncStatus(type, message) {
 
 function hideSyncStatus() {
   syncStatus.setAttribute('hidden', '');
-  syncStatus.className = 'sync-status';
+  syncStatus.className   = 'sync-status';
   syncStatus.textContent = '';
 }
 
-/**
- * Simulated async delay — replace with real fetch() in production.
- * @param {number} ms
- */
 function simulatedDelay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /* ═══════════════════════════════════════════════
-   LOCAL STORAGE PERSISTENCE
+   LOCAL STORAGE
    ═══════════════════════════════════════════════ */
-const STORAGE_KEY     = 'taskflow_pro_tasks';
-const COUNTER_KEY     = 'taskflow_pro_counter';
+const STORAGE_KEY  = 'draft_tasks_v1';
+const COUNTER_KEY  = 'draft_counter_v1';
 
 function saveToStorage() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-    localStorage.setItem(COUNTER_KEY, String(taskIdCounter));
+    localStorage.setItem(STORAGE_KEY,  JSON.stringify(tasks));
+    localStorage.setItem(COUNTER_KEY,  String(taskIdCounter));
   } catch (e) {
-    console.warn('[TaskFlow Pro] localStorage unavailable:', e);
+    console.warn('[DRAFT.] localStorage write failed:', e);
   }
 }
 
@@ -387,39 +416,28 @@ function loadFromStorage() {
     if (stored)  tasks         = JSON.parse(stored);
     if (counter) taskIdCounter = parseInt(counter, 10);
   } catch (e) {
-    console.warn('[TaskFlow Pro] Could not load from localStorage:', e);
+    console.warn('[DRAFT.] localStorage read failed:', e);
     tasks = [];
   }
 }
 
 /* ═══════════════════════════════════════════════
-   UTILITY HELPERS
+   UTILITIES
    ═══════════════════════════════════════════════ */
 
-/**
- * Sanitizes user input to prevent XSS by escaping HTML characters.
- * @param {string} str
- * @returns {string}
- */
+/** XSS sanitization */
 function sanitize(str) {
   const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
   return str.replace(/[&<>"']/g, (m) => map[m]);
 }
 
-/**
- * Formats an ISO date string into a human-readable short date.
- * @param {string} iso
- * @returns {string}
- */
+/** Human-readable date */
 function formatDate(iso) {
   try {
-    const date = new Date(iso);
-    return date.toLocaleDateString('en-US', {
+    return new Date(iso).toLocaleDateString('en-US', {
       month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
     });
-  } catch {
-    return '';
-  }
+  } catch { return ''; }
 }
 
 /* ═══════════════════════════════════════════════

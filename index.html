@@ -5,148 +5,183 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- SEO Meta Tags -->
-  <meta name="description" content="TaskFlow Pro – A professional task tracker built for accounting departments to manage, track, and sync work items efficiently." />
-  <meta name="keywords" content="task tracker, accounting, project management, TaskFlow Pro, productivity" />
-  <meta name="author" content="TaskFlow Pro" />
+  <meta name="description" content="DRAFT. — A universal task tracker with a vintage typewriter soul. Write it down. Get it done." />
+  <meta name="keywords" content="task tracker, to-do list, productivity, DRAFT, tasks, universal" />
+  <meta name="author" content="DRAFT." />
   <meta name="robots" content="index, follow" />
-  <meta property="og:title" content="TaskFlow Pro – Accounting Task Tracker" />
-  <meta property="og:description" content="Manage accounting tasks with clarity and precision." />
+  <meta property="og:title" content="DRAFT. — Write It Down. Get It Done." />
+  <meta property="og:description" content="A universal task tracker with a vintage typewriter aesthetic." />
   <meta property="og:type" content="website" />
 
-  <title>TaskFlow Pro | Accounting Task Tracker</title>
+  <title>DRAFT. — Write It Down. Get It Done.</title>
+
+  <!-- Inline SVG Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%231a1208'/%3E%3Crect x='5' y='8' width='22' height='16' rx='2' fill='none' stroke='%23c8a85a' stroke-width='1.5'/%3E%3Cline x1='9' y1='13' x2='23' y2='13' stroke='%23c8a85a' stroke-width='1.2'/%3E%3Cline x1='9' y1='17' x2='19' y2='17' stroke='%23c8a85a' stroke-width='1.2'/%3E%3Crect x='14' y='21' width='4' height='3' fill='%23c8a85a'/%3E%3C/svg%3E" />
+  <!-- Fallback PNG favicon via canvas-free approach -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%231a1208'/%3E%3Ctext x='50%25' y='58%25' font-size='110' text-anchor='middle' dominant-baseline='middle' fill='%23c8a85a' font-family='serif'%3ED%3C/text%3E%3C/svg%3E" />
+
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" />
 </head>
 <body>
 
-  <!-- Background grid texture -->
-  <div class="bg-grid" aria-hidden="true"></div>
+  <!-- Paper grain overlay -->
+  <div class="paper-grain" aria-hidden="true"></div>
+
+  <!-- Horizontal rule decorations -->
+  <div class="page-rule page-rule--top" aria-hidden="true"></div>
 
   <div id="app-wrapper">
 
-    <!-- ===== HEADER ===== -->
-    <header id="site-header" role="banner">
-      <div class="header-inner">
-        <div class="logo-block">
-          <span class="logo-icon" aria-hidden="true">◈</span>
-          <div>
-            <h1 class="logo-title">TaskFlow <span class="logo-accent">Pro</span></h1>
-            <p class="logo-sub">Accounting Department</p>
-          </div>
+    <!-- ===== MASTHEAD ===== -->
+    <header id="masthead" role="banner">
+      <div class="masthead-top">
+        <span class="masthead-vol" aria-label="Volume 1">Vol. I</span>
+        <div class="masthead-center">
+          <p class="masthead-kicker">The Universal Task Recorder</p>
+          <h1 class="masthead-title">DRAFT<span class="masthead-period">.</span></h1>
+          <p class="masthead-sub">Write It Down &mdash; Get It Done</p>
         </div>
-        <div class="header-meta" aria-live="polite" aria-label="Task statistics">
-          <div class="stat-pill" id="stat-total">
+        <div class="masthead-stats" aria-live="polite" aria-label="Task statistics">
+          <div class="stat-block">
             <span class="stat-num" id="count-total">0</span>
             <span class="stat-label">Total</span>
           </div>
-          <div class="stat-pill" id="stat-active">
+          <div class="stat-divider" aria-hidden="true">|</div>
+          <div class="stat-block">
             <span class="stat-num" id="count-active">0</span>
             <span class="stat-label">Active</span>
           </div>
-          <div class="stat-pill" id="stat-done">
+          <div class="stat-divider" aria-hidden="true">|</div>
+          <div class="stat-block">
             <span class="stat-num" id="count-done">0</span>
             <span class="stat-label">Done</span>
           </div>
         </div>
+      </div>
+      <div class="masthead-rule" aria-hidden="true">
+        <span class="rule-line"></span>
+        <span class="rule-diamond">◆</span>
+        <span class="rule-line"></span>
+      </div>
+
+      <!-- Typewriter tagline -->
+      <div class="typewriter-wrap" aria-hidden="true">
+        <span class="typewriter-line" id="typewriter-line"></span><span class="typewriter-cursor">|</span>
       </div>
     </header>
 
     <!-- ===== MAIN ===== -->
     <main id="main-content" role="main">
 
-      <!-- Input Card -->
-      <section class="input-card" aria-labelledby="add-task-heading">
-        <h2 id="add-task-heading" class="section-heading">New Task</h2>
+      <!-- Input Section -->
+      <section class="compose-section" aria-labelledby="compose-heading">
+        <h2 id="compose-heading" class="compose-label">
+          <span class="compose-label-bracket">[</span> New Entry <span class="compose-label-bracket">]</span>
+        </h2>
 
-        <div class="input-row">
-          <div class="input-wrapper">
-            <label for="task-input" class="sr-only">Enter a new task</label>
-            <input
-              type="text"
-              id="task-input"
-              class="task-input"
-              placeholder="e.g. Reconcile Q3 bank statements…"
-              aria-describedby="error-msg"
-              aria-required="true"
-              maxlength="200"
-              autocomplete="off"
-            />
-            <span class="input-underline" aria-hidden="true"></span>
+        <div class="compose-box">
+          <!-- Blockquote-style input chrome -->
+          <div class="compose-chrome" aria-hidden="true">
+            <span class="chrome-corner chrome-corner--tl"></span>
+            <span class="chrome-corner chrome-corner--tr"></span>
           </div>
 
-          <button
-            id="add-btn"
-            class="btn btn--primary"
-            aria-label="Add new task"
+          <div class="compose-inner">
+            <span class="compose-prompt" aria-hidden="true">&gt;&gt;</span>
+            <div class="input-wrapper">
+              <label for="task-input" class="sr-only">Type your task</label>
+              <input
+                type="text"
+                id="task-input"
+                class="task-input"
+                placeholder="Type your task here…"
+                aria-describedby="error-msg"
+                aria-required="true"
+                maxlength="200"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </div>
+            <button id="add-btn" class="btn-add" aria-label="Add new task">
+              <span class="btn-add-label">SUBMIT</span>
+              <span class="btn-add-key" aria-hidden="true">↵</span>
+            </button>
+          </div>
+
+          <!-- Error message -->
+          <div
+            id="error-msg"
+            class="error-msg"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+            hidden
           >
-            <span class="btn-icon" aria-hidden="true">+</span>
-            <span class="btn-text">Add Task</span>
-          </button>
-        </div>
+            <span class="error-glyph" aria-hidden="true">!</span>
+            <span>Entry cannot be blank. Please type something.</span>
+          </div>
 
-        <!-- Error message – hidden by default -->
-        <div
-          id="error-msg"
-          class="error-msg"
-          role="alert"
-          aria-live="assertive"
-          aria-atomic="true"
-          hidden
-        >
-          <span class="error-icon" aria-hidden="true">⚠</span>
-          Please enter a task description before adding.
-        </div>
+          <!-- API sync status -->
+          <div
+            id="sync-status"
+            class="sync-status"
+            role="status"
+            aria-live="polite"
+            hidden
+          ></div>
 
-        <!-- API sync status -->
-        <div
-          id="sync-status"
-          class="sync-status"
-          role="status"
-          aria-live="polite"
-          aria-label="API sync status"
-          hidden
-        ></div>
+          <div class="compose-chrome compose-chrome--bottom" aria-hidden="true">
+            <span class="chrome-corner chrome-corner--bl"></span>
+            <span class="chrome-corner chrome-corner--br"></span>
+          </div>
+        </div>
       </section>
+
+      <!-- Divider -->
+      <div class="section-divider" aria-hidden="true">
+        <span class="divider-text">— Filed Entries —</span>
+      </div>
 
       <!-- Filter Bar -->
       <div class="filter-bar" role="group" aria-label="Filter tasks">
         <button class="filter-btn active" data-filter="all" aria-pressed="true">All</button>
+        <span class="filter-sep" aria-hidden="true">/</span>
         <button class="filter-btn" data-filter="active" aria-pressed="false">Active</button>
+        <span class="filter-sep" aria-hidden="true">/</span>
         <button class="filter-btn" data-filter="completed" aria-pressed="false">Completed</button>
-        <button id="clear-completed-btn" class="filter-btn filter-btn--danger" aria-label="Clear all completed tasks">
-          Clear Completed
+        <button id="clear-completed-btn" class="filter-btn filter-btn--strike" aria-label="Clear all completed tasks">
+          × Clear Done
         </button>
       </div>
 
       <!-- Task List -->
       <section class="task-section" aria-labelledby="task-list-heading">
         <h2 id="task-list-heading" class="sr-only">Task List</h2>
-
         <ul
           id="task-list"
           class="task-list"
           role="list"
-          aria-label="Task list"
+          aria-label="Task entries"
           aria-live="polite"
-        >
-          <!-- Tasks injected by JS -->
-        </ul>
+        ></ul>
 
         <!-- Empty state -->
-        <div id="empty-state" class="empty-state" aria-hidden="false">
-          <span class="empty-icon" aria-hidden="true">◫</span>
-          <p class="empty-title">No tasks yet</p>
-          <p class="empty-sub">Add your first task above to get started.</p>
+        <div id="empty-state" class="empty-state">
+          <p class="empty-quote">&ldquo;An empty page is a beginning.&rdquo;</p>
+          <p class="empty-sub">No entries yet &mdash; add one above.</p>
         </div>
       </section>
 
     </main>
 
     <!-- ===== FOOTER ===== -->
+    <div class="page-rule page-rule--footer" aria-hidden="true"></div>
     <footer id="site-footer" role="contentinfo">
-      <p>TaskFlow Pro &copy; <span id="footer-year"></span> &mdash; Accounting Division</p>
+      <p>DRAFT. &mdash; Universal Task Recorder &mdash; <span id="footer-year"></span></p>
+      <p class="footer-sub">All entries stored locally in your browser.</p>
     </footer>
 
   </div><!-- /#app-wrapper -->
